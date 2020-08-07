@@ -16,6 +16,11 @@ Pod::Spec.new do |s|
   s.xcconfig = { 'GCC_ENABLE_CPP_EXCEPTIONS' => 'YES' }
   s.default_subspecs = 'Installations'
 
+  s.pod_target_xcconfig = {
+    'USE_HEADERMAP' => 'NO',
+    'HEADER_SEARCH_PATHS' => '"$(PODS_ROOT)/KSCrash/**"'
+  }
+
   s.subspec 'Recording' do |recording|
     recording.source_files   = 'Source/KSCrash/Recording/**/*.{h,m,mm,c,cpp}',
                                'Source/KSCrash/llvm/**/*.{h,m,mm,c,cpp}',
