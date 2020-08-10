@@ -19,7 +19,7 @@ Pod::Spec.new do |s|
 
   s.pod_target_xcconfig = {
     'USE_HEADERMAP' => 'NO',
-    'HEADER_SEARCH_PATHS' => '"$(PODS_ROOT)/KSCrash/**"'
+    'HEADER_SEARCH_PATHS' => '"$(PODS_ROOT)/KumulosKSCrash/**"'
   }
 
   s.subspec 'Recording' do |recording|
