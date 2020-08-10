@@ -13,11 +13,12 @@ Pod::Spec.new do |s|
   s.module_name = 'KSCrash'
   s.source       = { :git => "https://github.com/Kumulos/KSCrash.git", :tag=>s.version.to_s }
   s.frameworks = 'Foundation'
-  s.libraries = 'c++', 'z', 'llvm'
+  s.libraries = 'c++', 'z'
   s.xcconfig = { 'GCC_ENABLE_CPP_EXCEPTIONS' => 'YES' }
   s.default_subspecs = 'Installations'
 
-  s.pod_target_xcconfig = {
+  s.ios.libraries = 'c++', 'z', 'llvm'
+  s.ios.pod_target_xcconfig = {
     'USE_HEADERMAP' => 'NO',
     'HEADER_SEARCH_PATHS' => '"$(PODS_ROOT)/KumulosKSCrash/**"'
   }
