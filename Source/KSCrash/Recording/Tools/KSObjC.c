@@ -195,7 +195,7 @@ static const struct class_t* decodeIsaPointer(const void* const isaPointer)
     if(isa & ISA_TAG_MASK)
     {
 #if defined(__arm64__)
-        if (floor(kCFCoreFoundationVersionNumber) <= kCFCoreFoundationVersionNumber_iOS_8_x_Max) {
+        if (floor(kCFCoreFoundationVersionNumber) <= 1199) {
             return (const struct class_t*)(isa & ISA_MASK_OLD);
         }
         return (const struct class_t*)(isa & ISA_MASK);
@@ -214,7 +214,7 @@ static const void* getIsaPointer(const void* const objectOrClassPtr)
 //    {
 //        return getClassDataFromTaggedPointer(objectOrClassPtr)->class;
 //    }
-    
+
     const struct class_t* ptr = objectOrClassPtr;
     return decodeIsaPointer(ptr->isa);
 }
@@ -295,7 +295,7 @@ static int64_t extractTaggedNSNumber(const void* const object)
 #else
     intptr_t value = signedPointer & 0;
 #endif
-    
+
     // The lower 4 bits encode type information so shift them out.
     return (int64_t)(value >> 4);
 }
@@ -415,12 +415,12 @@ static int stringPrintf(char* buffer, int bufferLength, const char* fmt, ...)
     {
         return 0;
     }
-    
+
     va_list args;
     va_start(args,fmt);
     int printLength = vsnprintf(buffer, bufferLength, fmt, args);
     va_end(args);
-    
+
     unlikely_if(printLength < 0)
     {
         *buffer = 0;
@@ -560,7 +560,7 @@ static bool containsValidIvarData(const void* const classPtr)
     {
         return false;
     }
-    
+
     if(ivars->count > 0)
     {
         struct ivar_t ivar;
@@ -710,9 +710,9 @@ bool ksobjc_isKindOfClass(const void* const classPtr, const char* const classNam
     {
         return false;
     }
-    
+
     const struct class_t* class = (const struct class_t*)classPtr;
-    
+
     for(int i = 0; i < 20; i++)
     {
         const char* name = getClassName(class);
@@ -737,7 +737,7 @@ const void* ksobjc_baseClass(const void* const classPtr)
 {
     const struct class_t* superClass = classPtr;
     const struct class_t* subClass = classPtr;
-    
+
     for(int i = 0; i < 20; i++)
     {
         if(isRootClass(superClass))
@@ -771,7 +771,7 @@ int ksobjc_ivarList(const void* const classPtr, KSObjCIvar* dstIvars, int ivarsC
     {
         return 0;
     }
-    
+
     int count = ksobjc_ivarCount(classPtr);
     if(count == 0)
     {
@@ -850,7 +850,7 @@ bool ksobjc_ivarValue(const void* const objectPtr, int ivarIndex, void* dst)
     }
     uintptr_t ivarPtr = (uintptr_t)&ivars->first;
     const struct ivar_t* ivar = (void*)(ivarPtr + ivars->entsizeAndFlags * (unsigned)ivarIndex);
-    
+
     uintptr_t valuePtr = (uintptr_t)objectPtr + (uintptr_t)*ivar->offset;
     if(!ksmem_copySafely((void*)valuePtr, dst, (int)ivar->size))
     {
@@ -890,17 +890,17 @@ KSObjCType ksobjc_objectType(const void* objectOrClassPtr)
     {
         return KSObjCTypeObject;
     }
-    
+
     if(!isValidObject(objectOrClassPtr))
     {
         return KSObjCTypeUnknown;
     }
-    
+
     if(!isValidClass(objectOrClassPtr))
     {
         return KSObjCTypeUnknown;
     }
-    
+
     const struct class_t* isa = getIsaPointer(objectOrClassPtr);
 
     if(isBlockClass(isa))
@@ -911,7 +911,7 @@ KSObjCType ksobjc_objectType(const void* objectOrClassPtr)
     {
         return KSObjCTypeObject;
     }
-    
+
     return KSObjCTypeClass;
 }
 
@@ -970,7 +970,7 @@ static bool stringIsValid(const void* const stringPtr)
     {
         return false;
     }
-    
+
     if(__CFStrIsInline(string))
     {
         if(!ksmem_copySafely(&string->variants.inline1, &temp, sizeof(string->variants.inline1)))
@@ -1007,7 +1007,7 @@ static bool stringIsValid(const void* const stringPtr)
         }
         length = oneByte;
     }
-    
+
     if(length < 0)
     {
         return false;
@@ -1090,7 +1090,7 @@ static int copyAndConvertUTF16StringToUTF8(const void* const src,
             character += kUTF16_FirstSupplementaryPlane;
             charsRemaining--;
         }
-        
+
         // Encode UTF-8
         likely_if(character <= 0x7f)
         {
@@ -1143,7 +1143,7 @@ static int copyAndConvertUTF16StringToUTF8(const void* const src,
             return 0;
         }
     }
-    
+
     // Null terminate and return.
     *pDst = 0;
     return (int)(pDst - (uint8_t*)dst);
@@ -1183,13 +1183,13 @@ int ksobjc_copyStringContents(const void* stringPtr, char* dst, int maxByteCount
     }
     const struct __CFString* string = stringPtr;
     int charCount = ksobjc_stringLength(string);
-    
+
     const char* src = stringStart(string);
     if(__CFStrIsUnicode(string))
     {
         return copyAndConvertUTF16StringToUTF8(src, dst, charCount, maxByteCount);
     }
-    
+
     return copy8BitString(src, dst, charCount, maxByteCount);
 }
 
@@ -1197,7 +1197,7 @@ static int stringDescription(const void* object, char* buffer, int bufferLength)
 {
     char* pBuffer = buffer;
     char* pEnd = buffer + bufferLength;
-    
+
     pBuffer += objectDescription(object, pBuffer, (int)(pEnd - pBuffer));
     pBuffer += stringPrintf(pBuffer, (int)(pEnd - pBuffer), ": \"");
     pBuffer += ksobjc_copyStringContents(object, pBuffer, (int)(pEnd - pBuffer));
@@ -1241,12 +1241,12 @@ static int urlDescription(const void* object, char* buffer, int bufferLength)
 {
     char* pBuffer = buffer;
     char* pEnd = buffer + bufferLength;
-    
+
     pBuffer += objectDescription(object, pBuffer, (int)(pEnd - pBuffer));
     pBuffer += stringPrintf(pBuffer, (int)(pEnd - pBuffer), ": \"");
     pBuffer += ksobjc_copyURLContents(object, pBuffer, (int)(pEnd - pBuffer));
     pBuffer += stringPrintf(pBuffer, (int)(pEnd - pBuffer), "\"");
-    
+
     return (int)(pBuffer - buffer);
 }
 
@@ -1275,11 +1275,11 @@ static int dateDescription(const void* object, char* buffer, int bufferLength)
 {
     char* pBuffer = buffer;
     char* pEnd = buffer + bufferLength;
-    
+
     CFAbsoluteTime time = ksobjc_dateContents(object);
     pBuffer += objectDescription(object, pBuffer, (int)(pEnd - pBuffer));
     pBuffer += stringPrintf(pBuffer, (int)(pEnd - pBuffer), ": %f", time);
-    
+
     return (int)(pBuffer - buffer);
 }
 
@@ -1437,7 +1437,7 @@ static inline int nsarrayCount(const void* const arrayPtr)
 static int nsarrayContents(const void* const arrayPtr, uintptr_t* contents, int count)
 {
     const struct NSArray* array = arrayPtr;
-    
+
     if(array->basic.count < (CFIndex)count)
     {
         if(array->basic.count <= 0)
@@ -1451,7 +1451,7 @@ static int nsarrayContents(const void* const arrayPtr, uintptr_t* contents, int 
     {
         return 0;
     }
-    
+
     if(!ksmem_copySafely(&array->basic.firstEntry, contents, (int)sizeof(*contents) * count))
     {
         return 0;
@@ -1504,7 +1504,7 @@ static int cfarrayContents(const void* const arrayPtr, uintptr_t* contents, int 
         }
         count = (int)array->_count;
     }
-    
+
     const void* firstEntry = cfarrayData(array);
     if(!ksmem_copySafely(firstEntry, contents, (int)sizeof(*contents) * count))
     {
@@ -1552,7 +1552,7 @@ static int arrayDescription(const void* object, char* buffer, int bufferLength)
 {
     char* pBuffer = buffer;
     char* pEnd = buffer + bufferLength;
-    
+
     pBuffer += objectDescription(object, pBuffer, (int)(pEnd - pBuffer));
     pBuffer += stringPrintf(pBuffer, (int)(pEnd - pBuffer), ": [");
 
@@ -1565,7 +1565,7 @@ static int arrayDescription(const void* object, char* buffer, int bufferLength)
         }
     }
     pBuffer += stringPrintf(pBuffer, (int)(pEnd - pBuffer), "]");
-    
+
     return (int)(pBuffer - buffer);
 }
 
@@ -1584,22 +1584,22 @@ bool ksobjc_dictionaryFirstEntry(const void* dict, uintptr_t* key, uintptr_t* va
     {
         return false;
     }
-    
+
     struct __CFBasicHash* ht = (struct __CFBasicHash*)dict;
     uintptr_t* keys = (uintptr_t*)ht->pointers + ht->bits.keys_offset;
     uintptr_t* values = (uintptr_t*)ht->pointers;
-    
+
     // Dereference key and value pointers.
     if(!ksmem_copySafely(keys, &keys, sizeof(keys)))
     {
         return false;
     }
-    
+
     if(!ksmem_copySafely(values, &values, sizeof(values)))
     {
         return false;
     }
-    
+
     // Copy to destination.
     if(!ksmem_copySafely(keys, key, sizeof(*key)))
     {
