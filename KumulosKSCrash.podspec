@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   IOS_DEPLOYMENT_TARGET = '6.0' unless defined? IOS_DEPLOYMENT_TARGET
   s.name         = "KumulosKSCrash"
-  s.version      = "1.15.21-kumulos1"
+  s.version      = "1.15.21-kumulos3"
   s.summary      = "The Ultimate iOS Crash Reporter"
   s.homepage     = "https://github.com/Kumulos/KSCrash"
   s.license     = { :type => 'KSCrash license agreement', :file => 'LICENSE' }
